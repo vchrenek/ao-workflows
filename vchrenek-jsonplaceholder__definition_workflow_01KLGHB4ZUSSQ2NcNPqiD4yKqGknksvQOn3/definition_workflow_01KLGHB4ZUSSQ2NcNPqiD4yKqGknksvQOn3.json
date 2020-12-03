@@ -1,0 +1,451 @@
+{
+  "workflow": {
+    "unique_name": "definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3",
+    "name": "vchrenek_master_lab",
+    "title": "vchrenek_master_lab",
+    "type": "generic.workflow",
+    "base_type": "workflow",
+    "variables": [
+      {
+        "schema_id": "datatype.string",
+        "properties": {
+          "value": "Bret",
+          "scope": "input",
+          "name": "name",
+          "type": "datatype.string",
+          "is_required": true,
+          "is_invisible": false
+        },
+        "unique_name": "variable_workflow_01KLGJU2JPCD540vwe6h8HDGqkfuuPqRPRM",
+        "object_type": "variable_workflow"
+      },
+      {
+        "schema_id": "datatype.string",
+        "properties": {
+          "value": "",
+          "scope": "local",
+          "name": "results",
+          "type": "datatype.string",
+          "is_required": false,
+          "is_invisible": false
+        },
+        "unique_name": "variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP",
+        "object_type": "variable_workflow"
+      }
+    ],
+    "properties": {
+      "atomic": {
+        "is_atomic": false
+      },
+      "delete_workflow_instance": false,
+      "display_name": "vchrenek_master_lab",
+      "runtime_user": {
+        "override_target_runtime_user": false,
+        "specify_on_workflow_start": false,
+        "target_default": true
+      },
+      "target": {
+        "target_type": "web-service.endpoint",
+        "target_id": "definition_target_01KKODDWCVFC22S4kLjUyj2HchA8GBbTdkK",
+        "execute_on_workflow_target": true
+      }
+    },
+    "object_type": "definition_workflow",
+    "actions": [
+      {
+        "unique_name": "definition_activity_01KLGIE5ALYZQ1yQir0NkQr2a3t7XeSuefV",
+        "name": "vchrenek_query_jsonplaceholder",
+        "title": "vchrenek_query_jsonplaceholder",
+        "type": "workflow.atomic_workflow",
+        "base_type": "subworkflow",
+        "properties": {
+          "display_name": "vchrenek_query_jsonplaceholder",
+          "input": {
+            "variable_workflow_01KLFXFEC5JA243J4MPmkfyesLXYtPZ6FtJ": "users"
+          },
+          "runtime_user": {
+            "target_default": true
+          },
+          "target": {
+            "execute_on_this_target": true,
+            "target_id": "definition_target_01KKODDWCVFC22S4kLjUyj2HchA8GBbTdkK",
+            "target_type": "web-service.endpoint"
+          },
+          "workflow_id": "definition_workflow_01KKMWTWKC2C20h6BhvE6W2LRXS51MyHbLr"
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01KLGK5B6NSSF1gsKYQHkxmMRftGcNH2ZSL",
+        "name": "JSONPath Query",
+        "title": "Get Username from JSNOPLACEHOLDER",
+        "type": "corejava.jsonpathquery",
+        "base_type": "activity",
+        "properties": {
+          "action_timeout": 180,
+          "continue_on_failure": true,
+          "display_name": "Get Username from JSNOPLACEHOLDER",
+          "input_json": "$activity.definition_activity_01KLGIE5ALYZQ1yQir0NkQr2a3t7XeSuefV.output.variable_workflow_01KLFYES3HG662EVqRlN3H4HRlCnStwCwW3$",
+          "jsonpath_queries": [
+            {
+              "jsonpath_query": "$.[?(@.username==\"$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.input.variable_workflow_01KLGJU2JPCD540vwe6h8HDGqkfuuPqRPRM$\")]",
+              "jsonpath_query_name": "name",
+              "jsonpath_query_type": "string"
+            }
+          ],
+          "skip_execution": false
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01KLI1OICTNEL5q6iH57FGMgz28rR2PAhdZ",
+        "name": "Execute Python Script",
+        "title": "Look for Name",
+        "type": "python3.script",
+        "base_type": "activity",
+        "properties": {
+          "action_timeout": 180,
+          "continue_on_failure": true,
+          "display_name": "Look for Name",
+          "script": "import json\nimport sys\n\ntry:\n    block = json.loads(sys.argv[1])\n    if block['name']:\n        output = block['name']\n    else:\n        output = \"No Name Found.\"\nexcept:\n    output = \"No Name Found\"",
+          "script_arguments": [
+            "$activity.definition_activity_01KLGK5B6NSSF1gsKYQHkxmMRftGcNH2ZSL.output.jsonpath_queries.name$"
+          ],
+          "script_queries": [
+            {
+              "script_query": "output",
+              "script_query_name": "name_of_person",
+              "script_query_type": "string"
+            }
+          ],
+          "skip_execution": false
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01KLI7U6AVDDE19tMgoQBe708D7wIquj58b",
+        "name": "Condition Block",
+        "title": "If found name",
+        "type": "logic.if_else",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "If found name",
+          "skip_execution": false
+        },
+        "object_type": "definition_activity",
+        "blocks": [
+          {
+            "unique_name": "definition_activity_01KLI7UB9YAPC3z9mMz8ZdsK8oOi1PGjOZt",
+            "name": "Condition Branch",
+            "title": "THEN",
+            "type": "logic.condition_block",
+            "base_type": "activity",
+            "properties": {
+              "condition": {
+                "left_operand": "$activity.definition_activity_01KLGK5B6NSSF1gsKYQHkxmMRftGcNH2ZSL.output.succeeded$",
+                "operator": "eq",
+                "right_operand": true
+              },
+              "continue_on_failure": false,
+              "display_name": "THEN",
+              "skip_execution": false
+            },
+            "object_type": "definition_activity",
+            "actions": [
+              {
+                "unique_name": "definition_activity_01KLIIIUFDN0I2deKf1HLLZFq1KAy6pgqMB",
+                "name": "Group",
+                "title": "Send Found User Restult",
+                "type": "logic.group",
+                "base_type": "activity",
+                "properties": {
+                  "continue_on_failure": false,
+                  "display_name": "Send Found User Restult",
+                  "skip_execution": false
+                },
+                "object_type": "definition_activity",
+                "actions": [
+                  {
+                    "unique_name": "definition_activity_01KLIBJYBCWIF6eBuv1h2keADvgtOkQrkDT",
+                    "name": "Set Variables",
+                    "title": "Set Found Results",
+                    "type": "core.set_multiple_variables",
+                    "base_type": "activity",
+                    "properties": {
+                      "continue_on_failure": false,
+                      "display_name": "Set Found Results",
+                      "skip_execution": false,
+                      "variables_to_update": [
+                        {
+                          "variable_to_update": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                          "variable_value_new": "We found $activity.definition_activity_01KLI1OICTNEL5q6iH57FGMgz28rR2PAhdZ.output.script_queries.name_of_person$ by their username $workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.input.variable_workflow_01KLGJU2JPCD540vwe6h8HDGqkfuuPqRPRM$."
+                        }
+                      ]
+                    },
+                    "object_type": "definition_activity"
+                  },
+                  {
+                    "unique_name": "definition_activity_01KLIDKE9BKJ87evWzUGrMAllBpofGvzTH2",
+                    "name": "Write File",
+                    "title": "Write to Linux",
+                    "type": "terminal.write_file",
+                    "base_type": "activity",
+                    "properties": {
+                      "action_timeout": 180,
+                      "content": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                      "continue_on_failure": false,
+                      "display_name": "Write to Linux",
+                      "encoding": "utf-8",
+                      "file_name": "vchrenek-basic-workflow-results.txt",
+                      "options": "append",
+                      "runtime_user": {
+                        "override_target_runtime_user": false,
+                        "target_default": true
+                      },
+                      "skip_execution": false,
+                      "target": {
+                        "override_workflow_target": true,
+                        "target_id": "definition_target_01KLIFDAXZ8XE1uS9cqenqq5XPvzY212rob"
+                      }
+                    },
+                    "object_type": "definition_activity"
+                  },
+                  {
+                    "unique_name": "definition_activity_01KLIGPBJO6A54C4GEHUqS8oEnw0jAux0yA",
+                    "name": "Send Email",
+                    "title": "Send Results via Email",
+                    "type": "email.smtp_send_email",
+                    "base_type": "activity",
+                    "properties": {
+                      "action_timeout": 180,
+                      "body": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                      "continue_if_one_address_valid": false,
+                      "continue_on_failure": false,
+                      "display_name": "Send Results via Email",
+                      "from": "aobootcamp@gmail.com",
+                      "runtime_user": {
+                        "override_target_runtime_user": false,
+                        "target_default": true
+                      },
+                      "skip_execution": false,
+                      "subject": "Results for Lab01 SXO Bootcamp",
+                      "target": {
+                        "override_workflow_target": true,
+                        "target_id": "definition_target_01KKOF4LRALCC5BQkhhvnNj8Q2YKeQDHPWI"
+                      },
+                      "to": "vchrenek@cisco.com"
+                    },
+                    "object_type": "definition_activity"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "unique_name": "definition_activity_01KLI7UC86FZ12IyrBBnW2k6cZjV49aGaZ8",
+            "name": "Condition Branch",
+            "title": "ELSE",
+            "type": "logic.condition_block",
+            "base_type": "activity",
+            "properties": {
+              "condition": {
+                "left_operand": "$activity.definition_activity_01KLGK5B6NSSF1gsKYQHkxmMRftGcNH2ZSL.output.succeeded$",
+                "operator": "eq",
+                "right_operand": false
+              },
+              "continue_on_failure": false,
+              "display_name": "ELSE",
+              "skip_execution": false
+            },
+            "object_type": "definition_activity",
+            "actions": [
+              {
+                "unique_name": "definition_activity_01KLIIZVQXYT418lFz3eA4j3JnvkRyoKS5A",
+                "name": "Group",
+                "title": "Send Not Found User Restult",
+                "type": "logic.group",
+                "base_type": "activity",
+                "properties": {
+                  "continue_on_failure": false,
+                  "display_name": "Send Not Found User Restult",
+                  "skip_execution": false
+                },
+                "object_type": "definition_activity",
+                "actions": [
+                  {
+                    "unique_name": "definition_activity_01KLIJ017D4ZE5Yqur40t5yQOyPcHcVkCxn",
+                    "name": "Set Variables",
+                    "title": "Set Not Found Results",
+                    "type": "core.set_multiple_variables",
+                    "base_type": "activity",
+                    "properties": {
+                      "continue_on_failure": false,
+                      "display_name": "Set Not Found Results",
+                      "skip_execution": false,
+                      "variables_to_update": [
+                        {
+                          "variable_to_update": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                          "variable_value_new": "We did not find the person by their username $workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.input.variable_workflow_01KLGJU2JPCD540vwe6h8HDGqkfuuPqRPRM$."
+                        }
+                      ]
+                    },
+                    "object_type": "definition_activity"
+                  },
+                  {
+                    "unique_name": "definition_activity_01KLIJ0817KOO6jhBLIkpsiPyIUdAG4vssX",
+                    "name": "Write File",
+                    "title": "Write to Linux",
+                    "type": "terminal.write_file",
+                    "base_type": "activity",
+                    "properties": {
+                      "action_timeout": 180,
+                      "content": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                      "continue_on_failure": false,
+                      "display_name": "Write to Linux",
+                      "encoding": "utf-8",
+                      "file_name": "vchrenek-basic-workflow-results.txt",
+                      "options": "append",
+                      "runtime_user": {
+                        "override_target_runtime_user": false,
+                        "target_default": true
+                      },
+                      "skip_execution": false,
+                      "target": {
+                        "override_workflow_target": true,
+                        "target_id": "definition_target_01KLIFDAXZ8XE1uS9cqenqq5XPvzY212rob"
+                      }
+                    },
+                    "object_type": "definition_activity"
+                  },
+                  {
+                    "unique_name": "definition_activity_01KLIJ0C5K1Q34ej8uB8IbwnWDp5UHpoZC8",
+                    "name": "Send Email",
+                    "title": "Send Results via Email",
+                    "type": "email.smtp_send_email",
+                    "base_type": "activity",
+                    "properties": {
+                      "action_timeout": 180,
+                      "body": "$workflow.definition_workflow_01KLGHB4ZUSSQ2NcNPqiD4yKqGknksvQOn3.local.variable_workflow_01KLIBC8OK7H85DZCs7KFJkS6S7QSE5rdYP$",
+                      "continue_if_one_address_valid": false,
+                      "continue_on_failure": false,
+                      "display_name": "Send Results via Email",
+                      "from": "aobootcamp@gmail.com",
+                      "runtime_user": {
+                        "override_target_runtime_user": false,
+                        "target_default": true
+                      },
+                      "skip_execution": false,
+                      "subject": "Results for Lab01 SXO Bootcamp",
+                      "target": {
+                        "override_workflow_target": true,
+                        "target_id": "definition_target_01KKOF4LRALCC5BQkhhvnNj8Q2YKeQDHPWI"
+                      },
+                      "to": "vchrenek@cisco.com"
+                    },
+                    "object_type": "definition_activity"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "categories": [
+      "category_01KKO9Z6HSYW04cYUq53W40MciUVjHVGiex"
+    ]
+  },
+  "categories": {
+    "category_01KKO9Z6HSYW04cYUq53W40MciUVjHVGiex": {
+      "unique_name": "category_01KKO9Z6HSYW04cYUq53W40MciUVjHVGiex",
+      "name": "vchrenek",
+      "title": "vchrenek",
+      "type": "basic.category",
+      "base_type": "category",
+      "category_type": "custom",
+      "object_type": "category"
+    }
+  },
+  "targets": {
+    "definition_target_01KKODDWCVFC22S4kLjUyj2HchA8GBbTdkK": {
+      "unique_name": "definition_target_01KKODDWCVFC22S4kLjUyj2HchA8GBbTdkK",
+      "name": "vchrenek_json_placeholder",
+      "title": "vchrenek_json_placeholder",
+      "type": "web-service.endpoint",
+      "base_type": "target",
+      "object_type": "definition_target",
+      "properties": {
+        "disable_certificate_validation": true,
+        "display_name": "vchrenek_json_placeholder",
+        "host": "jsonplaceholder.typicode.com",
+        "ignore_proxy": false,
+        "no_runtime_user": true,
+        "port": 443,
+        "protocol": "https"
+      }
+    },
+    "definition_target_01KKOF4LRALCC5BQkhhvnNj8Q2YKeQDHPWI": {
+      "unique_name": "definition_target_01KKOF4LRALCC5BQkhhvnNj8Q2YKeQDHPWI",
+      "name": "vchrenek_default_smtp_server",
+      "title": "vchrenek_default_smtp_server",
+      "type": "email.smtp_endpoint",
+      "base_type": "target",
+      "object_type": "definition_target",
+      "properties": {
+        "default_runtime_user_id": "definition_runtime_user_01KKOEV7R9ZCF0PeBa6OJbPpOrmpZwchKjL",
+        "display_name": "vchrenek_default_smtp_server",
+        "no_runtime_user": false,
+        "port": 465,
+        "protocol": "SMTP",
+        "server": "smtp.gmail.com"
+      }
+    },
+    "definition_target_01KLIFDAXZ8XE1uS9cqenqq5XPvzY212rob": {
+      "unique_name": "definition_target_01KLIFDAXZ8XE1uS9cqenqq5XPvzY212rob",
+      "name": "vchrenek_CSIT-AUTO-FS",
+      "title": "vchrenek_CSIT-AUTO-FS",
+      "type": "terminal.unix_linux_endpoint",
+      "base_type": "target",
+      "object_type": "definition_target",
+      "properties": {
+        "bash_shell": "/bin/bash",
+        "default_runtime_user_id": "definition_runtime_user_01KLIF596KFYY6qdvnc1DSmhCFojY2vmcMF",
+        "display_name": "vchrenek_CSIT-AUTO-FS",
+        "host": "18.185.138.216",
+        "port": 22
+      }
+    }
+  },
+  "runtime_users": {
+    "definition_runtime_user_01KKOEV7R9ZCF0PeBa6OJbPpOrmpZwchKjL": {
+      "unique_name": "definition_runtime_user_01KKOEV7R9ZCF0PeBa6OJbPpOrmpZwchKjL",
+      "name": "vchrenek_bootcamp_gmail_creds",
+      "title": "vchrenek_bootcamp_gmail_creds",
+      "type": "runtime_user.email_credentials",
+      "base_type": "runtime_user",
+      "object_type": "definition_runtime_user",
+      "properties": {
+        "display_name": "vchrenek_bootcamp_gmail_creds",
+        "password": "*****",
+        "sender": "*****"
+      }
+    },
+    "definition_runtime_user_01KLIF596KFYY6qdvnc1DSmhCFojY2vmcMF": {
+      "unique_name": "definition_runtime_user_01KLIF596KFYY6qdvnc1DSmhCFojY2vmcMF",
+      "name": "vchrenek_unix_linux_admin",
+      "title": "vchrenek_unix_linux_admin",
+      "type": "runtime_user.terminal_password_credentials",
+      "base_type": "runtime_user",
+      "object_type": "definition_runtime_user",
+      "properties": {
+        "display_name": "vchrenek_unix_linux_admin",
+        "password": "*****",
+        "user": "*****"
+      }
+    }
+  },
+  "atomic_workflows": [
+    "definition_workflow_01KKMWTWKC2C20h6BhvE6W2LRXS51MyHbLr"
+  ]
+}
